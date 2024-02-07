@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="thumbnail.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape of Tom</title>
+
+    <style>
+
+        @font-face {
+            font-family: 'shermlock';
+            src: url('Shermlock.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'cooperBT';
+            src: url('CooperMdBT-Regular.ttf') format('truetype');
+        }
+
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            height: 100%;
+            background-color: #f0f0f0;
+            background-image: url('Cartoon.jpg'); 
+            background-size: cover; 
+            background-repeat: no-repeat;
+        }
+
+        .title {
+            font-family: 'shermlock', sans-serif;
+            padding: 0;
+            font-size: 10em; 
+            color: #ffdd00; 
+            text-shadow: 
+            -2px -2px 0 black,
+            2px -2px 0 black,
+            -2px  2px 0 black,
+            2px  2px 0 black;
+            text-align: center;
+            margin: 0%;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+        }
+
+
+        #gameOverOverlay {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1); 
+    color: #fff; 
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; 
+    font-family: 'shermlock', sans-serif; 
+}
+
+.log{
+    font-family: 'shermlock', sans-serif; 
+    font-size: 2.5rem;
+    margin-bottom: .5%;
+}
+
+.button {
+    font-family: 'cooperBT', serif;
+    font-weight: 100;
+    background-color: #ffdd00; 
+    color: black; 
+    font-size: 2.8rem;
+    padding: 20px 40px 15px 40px; 
+    cursor: pointer; 
+    border: none;
+    border-radius: 10px; 
+    width: auto; 
+    height: auto; 
+    display: inline-block; 
+    text-align: center; 
+    justify-content: center ;
+}
+
+
+        #tom {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            transition: transform 0.1s; 
+        }
+
+        .shape {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+        }
+
+       
+.instructions {
+    font-family: 'cooperBT', sans-serif;
+    font-weight: 100;
+    position: absolute;
+    text-align: center;
+    bottom: 40px; 
+    color: #ffdd00;
+    font-size: 1.5em; 
+    z-index: 5; 
+    line-height: 1.2em;
+}
+
+
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <h1 class="title">Shape of Tom</h1>
+        <img src="tom_cursor.png" id="tom" alt="Tom">
+        <div class="instructions">Instructions: Help Tom dodge the shapes <br>by moving the cursor around.</div>
+
+        <div id="gameOverOverlay">
+            <p class="log">Bonkers! You were hit!</p>
+            <button onclick="restartGame()" class="button">Restart Game</button>
+        </div>
+    </div>
+    <script>
+const gameContainer = document.getElementById('gameContainer');   //select HTML element with the ID gameContainer and assigns it to the constant gameContainer
+const tom = document.getElementById('tom');                       //select HTML element with the ID tom and assigns it to the constant tom. This element represents the character 
+let tomHit = false;                                               //Declares a variable tomHit and initializes it with the boolean value false as the default state is not hit
+
+const tomImagesSrc = ["tom_table.png", "tom_laundry.png", "tom_sit.png", "tom_stairs.png", "tom_tunnel.png"];  //Defines an array of strings, each representing the source path of a different image of Tom.
+const preloadedTomImages = tomImagesSrc.map(src => {                                                        // Preloading images to ensure they're ready when needed, for each source path in the array, a new image is created.
+    const img = new Image();                                                                                   //creates a new image object for each source path in the tomImagesSrc array.
+    img.src = src;                                                                                             //set the src attribute of the newly created image object to the current source path being iterated over
+    return img;                                                                                                //returns the newly created and sourced image object from the map function, creating an array of preloaded images stored in preloadedTomImages
+});
+const tomScream = new Audio('tom_hit_scream.mp3');                //creates a new audio object and assigns it to tomScream
+document.addEventListener('mousemove', function(event) {          //adds an event listener to the entire document that listens for mouse movements
+    if (!tomHit) {                                                //checks if tomHit is false. If Tom has not been hit, the code inside the if statement will execute. This condition prevents Tom from moving if he has been hit
+        tom.style.left = event.pageX + 'px';                      //sets the left CSS property of Tom's element to the current horizontal position of the mouse pointer, allowing Tom to follow the mouse horizontally.
+        tom.style.top = event.pageY + 'px';                       //sets the top CSS property of Tom's element to the current vertical position of the mouse pointer, allowing Tom follow the mouse vertically.
+    }
+});
+ 
+function generateShape() {                                                      //defines a function generateShape() that programmatically creates a shape element (div), styles it and randomly selects a color for it
+    const shapeTypes = ['triangle', 'oval', 'square', 'trapezoid'];             //an array shapeTypes is defined with four string elements representing different types of shapes that can be generated
+    const shapeColors = ['#283b90', '#dd2428', '#f4bc54', '#605e82', '#4e8879'];//an array shapeColors is defined with five string elements representing different color codes
+    const shape = document.createElement('div');                                //div element is created and stored in the variable shape. This div will be styled to represent one of the shapes defined in shapeTypes
+    const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];//A random index is selected from the shapeTypes array using Math.random() and Math.floor(), and the corresponding shape type is stored in shapeType.
+    shape.className = 'shape ' + shapeType;                                     //The class name of the shape is set to 'shape' followed by the randomly selected shapeType.
+    const color = shapeColors[Math.floor(Math.random() * shapeColors.length)];  //a random index is selected from the shapeColors array similar to how the shape type is selected, and the corresponding color is stored in the constant color.
+
+    if (shapeType === 'triangle') {                                             //If the shapeType is 'triangle', specific styles are applied to create a triangle appearance using borders and transparency.
+        shape.style.width = `0px`;                                            
+        shape.style.height = `0px`;                                            
+        shape.style.borderLeft = `${50}px solid transparent`;
+        shape.style.borderRight = `${50}px solid transparent`;
+        shape.style.borderBottom = `${100}px solid ${color}`;
+    } else if (shapeType === 'trapezoid') {                                     // //If the shapeType is 'trapezoid', specific styles are applied to create a trapezoid appearance using borders and transparency.
+        shape.style.width = `100px`;
+        shape.style.height = `0px`;
+        shape.style.borderLeft = `${25}px solid transparent`;
+        shape.style.borderRight = `${25}px solid transparent`;
+        shape.style.borderBottom = `${100}px solid ${color}`;
+        shape.style.borderTop = `0px solid transparent`;
+    } else if (shapeType === 'oval') {                                          //If the shapeType is 'oval', styles are applied to make the div round and color it
+        shape.style.width = `100px`;
+        shape.style.height = `100px`;
+        shape.style.borderRadius = '50%';
+        shape.style.backgroundColor = color;
+    } else {                                                                    //If the shapeType is 'oval', styles are applied to make the div round and color it
+        shape.style.width = `100px`;
+        shape.style.height = `100px`;
+        shape.style.backgroundColor = color;
+    }
+
+    const startX = Math.random() * (window.innerWidth - 100);                    //The startX variable is calculated to place the shape at a random horizontal position within the viewport, so that it does not overflow the screen's width.
+    shape.style.left = `${startX}px`;                                            //The shape's initial CSS left properties are set, placing it at the random startX position horizontally 
+    shape.style.top = '0px';                                                     //the shape's initial CSS top properties are set at the top of the viewport vertically.
+    gameContainer.appendChild(shape);                                            //The shape is added to the constant gameContainer so that it will be displayed on screen
+
+    let interval = setInterval(function() {                                      //An interval function is set up to move the shape down the screen and checks every 10 milliseconds, it is stored in the variable interval
+        if (shape.getBoundingClientRect().top > window.innerHeight) {            //Inside the interval function, a conditional check is performed first: This line checks if the top of the shape has moved past the bottom of the viewport If the shape's top edge is below the bottom edge of the window, the condition is true.
+            clearInterval(interval);                                             //If the shape has moved past the bottom of the viewport, clearInterval(interval); is called, stopping the interval and thus stopping the movement of the shape
+            shape.remove();                                                      //shape.remove(); is executed, which removes the shape element from the document, effectively clearing it from the screen
+        } else {                                                                 //If the shape has not yet moved past the bottom of the viewport, the else part of the condition increments the shape's top position.
+            shape.style.top = shape.getBoundingClientRect().top + 10 + 'px';     //shape.style.top = shape.getBoundingClientRect().top + 10 + 'px';, takes the current top position, adds 10 pixels to it, and then applies this new value back to the shape
+            checkCollision(shape);                                               //After moving the shape, checkCollision(shape); is called to see if the cursor image of Tom collided with any of the shapes
+        }
+    }, 10);
+}
+
+function checkCollision(shape) {                                                 //Defines a function named checkCollision that takes a single parameter called shape. This function is responsible for checking if "Tom" collides with another shape in the game
+    if (tomHit) return;                                                          //This line checks if a variable tomHit is truthy. If tomHit is true, it means Tom has already been hit, and the function returns early to avoid further collision checks. 
+
+    const tomRect = tom.getBoundingClientRect();                                 //Retrieves the position and size of Tom using the getBoundingClientRect() method. 
+    const shapeRect = shape.getBoundingClientRect();                             //Gets the position and size of the shape parameter passed to the function, allowing for collision detection between Tom and the shape.
+
+    if (!(tomRect.right < shapeRect.left ||                                      //checks if the right edge of tomRect is to the left of the left edge of shapeRect. If true, tomRect is entirely to the left of shapeRect, and they do not overlap
+          tomRect.left > shapeRect.right ||                                      //This checks if the left edge of tomRect is to the right of the right edge of shapeRect. If true, tomRect is entirely to the right of shapeRect, and they do not overlap.
+          tomRect.bottom < shapeRect.top ||                                      //This checks if the bottom edge of tomRect is above the top edge of shapeRect. If true, tomRect is entirely above shapeRect, and they do not overlap.
+          tomRect.top > shapeRect.bottom)) {                                     //This checks if the top edge of tomRect is below the bottom edge of shapeRect. If true, tomRect is entirely below shapeRect, and they do not overlap.
+        tomHit = true;                                                           //Once a collision is detected, this line sets tomHit to true, marking that Tom has been hit.
+        changeTomImage();                                                        //Calls the changeTomImage function, changing Tom from default to a random image from the tomImagesSrc array
+        tomScream.play();                                                        //Plays a sound effect for Tom's scream, indicating that Tom has been hit.
+        showGameOver();                                                          //Calls the showGameOver function, which pulls up the gameOverlay screen
+    }
+}
+
+function changeTomImage() {                                                      //Defines a function named changeTomImage with the purpose of changing Tom's visual representation in the game after tomHit becomes true
+    const randomIndex = Math.floor(Math.random() * preloadedTomImages.length);   //Calculates a random index based on the length of an array preloadedTomImages.
+    tom.src = preloadedTomImages[randomIndex].src;                               //Sets the src attribute of tom to the source of a randomly selected image from preloadedTomImages
+}
+
+function showGameOver() {                                                        //Defines a function named showGameOver that is responsible for displaying the game over overlay
+    document.getElementById('gameOverOverlay').style.display = 'flex';           //This line selects an element with the ID gameOverOverlay and changes its CSS display property to flex
+}
+
+function restartGame() {                                                         //Defines a function named restartGame that resets the game to its initial state.
+    tomHit = false;                                                              //Resets the tomHit variable to false, indicating that Tom is no longer in a "hit" state, allowing for collision checks to occur again
+    document.getElementById('gameOverOverlay').style.display = 'none';           //Hides the game-over overlay by selecting the element with the ID gameOverOverlay and setting its CSS display property to none. 
+    document.querySelectorAll('.shape').forEach(shape => shape.remove());        //Selects all elements with the class .shape and removes them from the document. This line cleans up any shapes that were on the screen, preparing for a new game.
+    tom.src = "tom_cursor.png";                                                  // Reset Tom's image to the initial cursor image
+    generateShapeAtRandomIntervals();                                            //Calls the generateShapeAtRandomIntervals function to start generating new shapes at random intervals
+}
+
+function generateShapeAtRandomIntervals() {                                      //Defines a function that handles the generation of shapes at random time intervals.
+    if (!tomHit) {                                                               //Checks if tomHit is false 
+        generateShape();                                                         //Calls a function named generateShape to create and display a new shape on the screen
+        setTimeout(generateShapeAtRandomIntervals, Math.random() * 500 + 100);   //Sets a timeout to recursively call generateShapeAtRandomIntervals again after a random interval between 100 to 600 milliseconds. This creates a loop that continuously generates shapes at random intervals
+    }
+}
+
+generateShapeAtRandomIntervals();
+
+
+
+</script>
+
+</body>
+</html>
